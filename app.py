@@ -15,7 +15,11 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://image-tampered-frontend.onrender.com"])
+CORS(app, origins=[
+    "http://localhost:5173", 
+    "https://image-tampered-frontend.onrender.com"
+])
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
