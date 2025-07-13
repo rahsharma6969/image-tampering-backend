@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, send_file
 from model.mantranet import pre_trained_model
 from model.utils import convert_pdf_to_images
@@ -37,12 +36,17 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info(f"Using device: {device}")
 
-# Load model
+# Load model with fallback
+model = None
 try:
-    model = pre_trained_model(weight_path='./model/MantraNetv4.pt')
-    model.to(device)
-    model.eval()
-    logger.info("Model loaded successfully")
+    model_path = './model/MantraNetv4.pt'
+    if os.path.exists(model_path):
+        model = pre_trained_model(weight_path=model_path)
+        model.to(device)
+        model.eval()
+        logger.info("Model loaded successfully")
+    else:
+        logger.warning(f"Model file not found at {model_path}")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
     model = None
@@ -281,4 +285,6 @@ def internal_error(e):
 
 if __name__ == '__main__':
     logger.info("Starting MantraNet Forgery Detection API...")
-    app.run(debug=True, host='0.0.0.0', port=5000)   
+    # Use PORT environment variable for Render deployment
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
